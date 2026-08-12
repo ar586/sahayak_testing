@@ -92,7 +92,7 @@ def generate_chat_response(
         
         # 4. Configure LLM
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             google_api_key=GOOGLE_API_KEY,
             temperature=0.5,
             convert_system_message_to_human=True # Gemma via API might benefit from this, though newer models handle system prompts. Keeping it safe or default.
@@ -165,7 +165,7 @@ def generate_streaming_chat_response(
         
         # 4. Configure LLM
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             google_api_key=GOOGLE_API_KEY,
             temperature=0.5,
             convert_system_message_to_human=True,
