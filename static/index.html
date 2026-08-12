@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Markdown Support -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <title>Dastabbej</title>
+
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dastabbej">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Dastabbej - The ultimate platform for NSUT students to access notices, circulars, and updates instantly. Built with advanced AI for summaries and chat.">
+    <meta name="keywords" content="NSUT, Notices, Circulars, Dastabbej, College Updates, AI Chat, Student Portal, NSIT">
+    <meta name="author" content="Dastabbej Team">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dastabbej.app/">
+    <meta property="og:title" content="Dastabbej - NSUT Notices & AI Assistant">
+    <meta property="og:description"
+        content="Stay updated with the latest NSUT notices. Chat with our AI assistant to get summaries and answers instantly.">
+    <meta property="og:image" content="/static/icons/icon-512x512.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://dastabbej.app/">
+    <meta property="twitter:title" content="Dastabbej - NSUT Notices & AI Assistant">
+    <meta property="twitter:description"
+        content="Stay updated with the latest NSUT notices. Chat with our AI assistant to get summaries and answers instantly.">
+    <meta property="twitter:image" content="/static/icons/icon-512x512.png">
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #334155;
+            --modal-bg: rgba(0, 0, 0, 0.7);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        /* Utils */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Grid */
+        .notices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .card-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .card-summary {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--modal-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+
+        .modal h2 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+        }
+
+        /* Chat Panel (Side overlay) */
+        .chat-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 50vw;
+            min-width: 400px;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-panel.open {
+            transform: translateX(0);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-chat {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--accent);
+            color: white;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            header h1 {
+                text-align: center;
+            }
+
+            /* Search bar full width on mobile */
+            header>div:nth-child(2) {
+                max-width: 100% !important;
+            }
+
+            /* Button group centered/justified */
+            header>div:last-child {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            .notices-grid {
+                grid-template-columns: 1fr;
+                /* Single column on mobile */
+            }
+
+            .chat-panel {
+                width: 100%;
+                min-width: 0;
+                /* Override the desktop min-width */
+            }
+        }
+
+        /* Markdown Styles */
+        .message p {
+            margin: 5px 0;
+        }
+
+        .message ul,
+        .message ol {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .message code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .message pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .card-summary p {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Onboarding Modal -->
+    <div id="onboardingModal" class="modal-overlay hidden">
+        <!-- ... existing modal ... -->
+        <!-- (keeping existing modal content same, just ensuring context) -->
+        <div class="modal">
+            <h2>Welcome to Dastabbej</h2>
+            <p style="color: var(--text-secondary);">Customize your experience by setting your details.</p>
+
+            <div class="form-group">
+                <label>Branch</label>
+                <select id="branchInput">
+                    <option value="" disabled selected>Select Branch</option>
+                    <option value="CSE">CSE</option>
+                    <option value="IT">IT</option>
+                    <option value="ECE">ECE</option>
+                    <option value="EE">EE</option>
+                    <option value="ME">ME</option>
+                    <option value="CIVIL">Civil</option>
+                    <option value="BT">BioTech</option>
+                    <option value="ARCH">Architecture</option>
+                    <option value="DESIGN">Design</option>
+                    <option value="MANAGEMENT">Management</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Year</label>
+                <select id="yearInput">
+                    <option value="" disabled selected>Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                    <option value="PG">Masters (PG)</option>
+                    <option value="PHD">PhD</option>
+                </select>
+            </div>
+
+            <button class="btn" style="width: 100%" onclick="saveProfile()">Get Started</button>
+        </div>
+    </div>
+
+    <!-- Container -->
+    <div class="container">
+        <!-- ... header ... -->
+        <header>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 20px;">
+                <h1>Dastabbej</h1>
+
+                <!-- Search Bar -->
+                <div style="flex: 1; max-width: 400px; position: relative;">
+                    <input type="text" id="searchInput" placeholder="Search notices..."
+                        style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: white;"
+                        oninput="debounceSearch()">
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="installAppBtn" class="btn" style="padding: 5px 10px; font-size: 0.8rem; display: none;"
+                        onclick="installPWA()">Install App</button>
+                    <button id="enableNotifBtn" class="btn" style="padding: 5px 10px; font-size: 0.8rem; display: none;"
+                        onclick="requestNotificationPermission()">Enable Notifications</button>
+                    <button id="disableNotifBtn" class="btn"
+                        style="padding: 5px 10px; font-size: 0.8rem; background-color: #ef4444; display: none;"
+                        onclick="disableNotifications()">Disable Notifications</button>
+                    <div class="user-info" id="userDisplay">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('global')">Global</button>
+            <button class="tab-btn" onclick="switchTab('foryou')">For You</button>
+        </div>
+
+        <div id="noticesContainer" class="notices-grid">
+            <!-- Cards injected here -->
+        </div>
+        <div id="sentinel" style="height: 20px; text-align: center; margin: 20px 0;">
+            <span id="loadingIndicator" class="hidden" style="color: var(--text-secondary);">Loading more...</span>
+        </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div id="chatPanel" class="chat-panel">
+        <div class="chat-header">
+            <h3 id="chatNoticeTitle">Chat</h3>
+            <button class="close-chat" onclick="closeChat()">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Ask about this notice..." onkeypress="handleEnter(event)">
+            <button class="btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // ... existing scripts ...
+
+        // --- State ---
+        let userProfile = null;
+        let allNotices = [];
+        let currentTab = 'global';
+        let currentNoticeId = null;
+        let searchQuery = "";
+        let searchTimeout = null;
+
+        // Pagination State
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMore = true;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            setupIntersectionObserver();
+            loadMoreNotices(true); // Initial load
+        });
+
+        function debounceSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(() => {
+                searchQuery = query;
+                loadMoreNotices(true);
+            }, 500); // 500ms debounce
+        }
+
+        // --- Session Management ---
+        function checkSession() {
+            const cookie = getCookie('dastabbej_session');
+            if (cookie) {
+                userProfile = JSON.parse(decodeURIComponent(cookie));
+                updateHeader();
+            } else {
+                document.getElementById('onboardingModal').classList.remove('hidden');
+            }
+        }
+
+        function saveProfile() {
+            const branch = document.getElementById('branchInput').value;
+            const year = document.getElementById('yearInput').value;
+
+            if (!branch || !year) return alert("Please select both fields");
+
+            const profile = {
+                id: crypto.randomUUID(),
+                branch,
+                year
+            };
+
+            setCookie('dastabbej_session', JSON.stringify(profile), 365);
+            userProfile = profile;
+
+            document.getElementById('onboardingModal').classList.add('hidden');
+            updateHeader();
+
+            // Reload with reset
+            loadMoreNotices(true);
+        }
+
+        function editProfile() {
+            if (userProfile) {
+                document.getElementById('branchInput').value = userProfile.branch;
+                document.getElementById('yearInput').value = userProfile.year;
+            }
+            document.getElementById('onboardingModal').classList.remove('hidden');
+        }
+
+        function updateHeader() {
+            if (userProfile) {
+                document.getElementById('userDisplay').innerHTML = `
+                    ${userProfile.branch} • Year ${userProfile.year}
+                    <button onclick="editProfile()" style="background:none; border:none; color:var(--accent); cursor:pointer; margin-left:8px; padding:0; text-decoration:underline; font-size:0.85rem;">Edit</button>
+                `;
+            }
+        }
+
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // --- API & UI ---
+
+        function setupIntersectionObserver() {
+            const sentinel = document.getElementById('sentinel');
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    loadMoreNotices();
+                }
+            }, { rootMargin: "100px" });
+
+            observer.observe(sentinel);
+        }
+
+        async function loadMoreNotices(reset = false) {
+            if (reset) {
+                currentPage = 1;
+                allNotices = [];
+                hasMore = true;
+                isLoading = false;
+                document.getElementById('noticesContainer').innerHTML = '';
+            }
+
+            if (isLoading || !hasMore) return;
+
+            isLoading = true;
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+
+            try {
+                const limit = 20;
+                let url;
+
+                if (searchQuery) {
+                    url = `/notices/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}&limit=${limit}`;
+                } else {
+                    url = `/notices?page=${currentPage}&limit=${limit}`;
+                }
+
+                const res = await fetch(url);
+                const newNotices = await res.json();
+
+                if (newNotices.length < limit) {
+                    hasMore = false;
+                }
+
+                if (newNotices.length > 0) {
+                    // Update State
+                    allNotices = allNotices.concat(newNotices);
+                    currentPage++;
+                    renderNotices();
+                } else {
+                    if (reset && searchQuery) {
+                        document.getElementById('noticesContainer').innerHTML = '<p style="color:var(--text-secondary)">No match found for "' + searchQuery + '"</p>';
+                    }
+                    hasMore = false;
+                }
+            } catch (e) {
+                console.error("Failed to fetch notices", e);
+            } finally {
+                isLoading = false;
+                document.getElementById('loadingIndicator').classList.add('hidden');
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Re-render current data
+            // If we want to support independent scroll per tab, we might need more complex state.
+            // For now, simple re-render of loaded data.
+            document.getElementById('noticesContainer').innerHTML = '';
+            renderNotices();
+
+            // If "For You" is selected and empty, we might want to trigger loadMore?
+            // The observer will trigger if sentinel is visible.
+        }
+
+        function renderNotices() {
+            const container = document.getElementById('noticesContainer');
+            // We clear and re-render everything to maintain order and filtering correctly
+            // This is O(N) but N is small (100-200 nodes).
+            container.innerHTML = '';
+
+            let filtered = allNotices;
+            if (currentTab === 'foryou' && userProfile) {
+                filtered = allNotices.filter(n => {
+                    const branches = n.tags?.branches || [];
+                    const years = n.tags?.years || [];
+
+                    // Relevance Check:
+                    // 1. Branch: Must match MyBranch OR be Generic ('ALL')
+                    // 2. Year: Must match MyYear OR be Generic ('ALL')
+                    const isBranchRelevant = branches.includes(userProfile.branch) || branches.includes('ALL');
+                    const isYearRelevant = years.includes(userProfile.year) || years.includes('ALL');
+
+                    // Specificity Check:
+                    // Must have at least one Specific tag (MyBranch or MyYear) to avoid showing purely generic notices in "For You".
+                    // Pure generic (ALL/ALL) goes to Global.
+                    const isSpecific = branches.includes(userProfile.branch) || years.includes(userProfile.year);
+
+                    return isBranchRelevant && isYearRelevant && isSpecific;
+                });
+            }
+
+            if (filtered.length === 0) {
+                if (!isLoading && !hasMore) {
+                    container.innerHTML = '<p style="color:var(--text-secondary)">No notices found.</p>';
+                } else if (!isLoading && hasMore && allNotices.length > 0) {
+                    // We have notices but none matched filter. Sentinel is visible, so it should trigger loadMore automatically.
+                    // But if container is empty, sentinel might be right at top.
+                }
+                // If it's pure initial load, sentinel is there.
+            }
+
+            filtered.forEach(notice => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openChat(notice);
+
+                const date = notice.date || 'No Date';
+                const summaryRaw = notice.summary || 'No summary available.';
+                const summaryHtml = DOMPurify.sanitize(marked.parse(summaryRaw));
+
+                let tagsHtml = '';
+                if (notice.tags?.branches) {
+                    notice.tags.branches.slice(0, 3).forEach(t => tagsHtml += `<span class="tag">${t}</span>`);
+                }
+
+                card.innerHTML = `
+                    <h3>${notice.title}</h3>
+                    <div class="card-meta">${date}</div>
+                    <div class="card-summary">${summaryHtml}</div>
+                    <div class="tags">${tagsHtml}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- Chat System ---
+        async function openChat(notice) {
+            if (!userProfile) return alert("Please complete your profile first.");
+
+            currentNoticeId = notice._id;
+            document.getElementById('chatPanel').classList.add('open');
+            document.getElementById('chatNoticeTitle').textContent = notice.title.substring(0, 30) + "...";
+
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = ''; // Clear previous
+
+            // 1. Display Summary always at the top
+            if (notice.summary) {
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'message assistant';
+                // Add specific styling to distinguish it as the Summary
+                summaryDiv.style.borderLeft = "4px solid var(--accent)";
+                summaryDiv.style.backgroundColor = "var(--card-bg)"; // Slightly different bg
+
+                const summaryHtml = DOMPurify.sanitize(marked.parse(notice.summary));
+
+                let viewDocHtml = "";
+                if (notice.cached_url) {
+                    viewDocHtml = `<div style="margin-top: 10px;">
+                        <a href="${notice.cached_url}" target="_blank" class="btn" style="display: inline-block; text-decoration: none; font-size: 0.9rem;">View Document</a>
+                    </div>`;
+                }
+
+                summaryDiv.innerHTML = `<strong>Summary</strong><br>` + summaryHtml + viewDocHtml;
+                chatContainer.appendChild(summaryDiv);
+            }
+
+            // Add a loading indicator for history
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'historyLoading';
+            loadingDiv.style.textAlign = 'center';
+            loadingDiv.style.color = 'gray';
+            loadingDiv.style.marginTop = '10px';
+            loadingDiv.textContent = 'Loading history...';
+            chatContainer.appendChild(loadingDiv);
+
+            // Load history
+            try {
+                const res = await fetch(`/chat/history/${userProfile.id}/${currentNoticeId}`);
+                const data = await res.json();
+                const messages = data.messages || [];
+
+                // Remove loading
+                if (document.getElementById('historyLoading')) {
+                    document.getElementById('historyLoading').remove();
+                }
+
+                messages.forEach(msg => appendMessage(msg.role, msg.content));
+                scrollToBottom();
+            } catch (e) {
+                console.error("Error loading history", e);
+                if (document.getElementById('historyLoading')) {
+                    document.getElementById('historyLoading').textContent = 'Error loading history';
+                }
+            }
+        }
+
+        function closeChat() {
+            document.getElementById('chatPanel').classList.remove('open');
+            currentNoticeId = null;
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const sendBtn = document.querySelector('.chat-input-area button');
+            const text = input.value.trim();
+            if (!text || !currentNoticeId) return;
+
+            // Disable input and button
+            input.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.style.opacity = "0.7";
+            sendBtn.style.cursor = "not-allowed";
+
+            appendMessage('user', text);
+            input.value = '';
+            scrollToBottom();
+
+            // Create placeholder for assistant message
+            const messagesDiv = document.getElementById('chatMessages');
+            const assistantMsgDiv = document.createElement('div');
+            assistantMsgDiv.className = 'message assistant';
+            assistantMsgDiv.innerHTML = '<span class="typing">Thinking...</span>'; // Initial state
+            messagesDiv.appendChild(assistantMsgDiv);
+            scrollToBottom();
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: text,
+                        user_id: userProfile.id,
+                        notice_id: currentNoticeId,
+                        user_branch: userProfile.branch,
+                        user_year: userProfile.year
+                    })
+                });
+
+                if (!res.ok) throw new Error("Network response was not ok");
+                if (!res.body) throw new Error("ReadableStream not yet supported in this browser.");
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullText = "";
+                let firstChunk = true;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+
+                    if (firstChunk) {
+                        // Clear "Thinking..."
+                        assistantMsgDiv.innerHTML = "";
+                        firstChunk = false;
+                    }
+
+                    // Render markdown on the fly
+                    assistantMsgDiv.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
+                    scrollToBottom();
+                }
+
+            } catch (e) {
+                console.error(e);
+                assistantMsgDiv.innerHTML += "<br><span style='color:red'>Error responding. Please try again.</span>";
+            } finally {
+                // Re-enable in all cases
+                input.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = "1";
+                sendBtn.style.cursor = "pointer";
+                input.focus();
+            }
+            scrollToBottom();
+        }
+
+        function appendMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = DOMPurify.sanitize(marked.parse(text));
+            document.getElementById('chatMessages').appendChild(div);
+        }
+
+        function scrollToBottom() {
+            const el = document.getElementById('chatMessages');
+            el.scrollTop = el.scrollHeight;
+        }
+    </script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkmq_3ADDPBJPEeKxbB1gdAzA6w_nYXvw",
+            authDomain: "dastabbej.firebaseapp.com",
+            projectId: "dastabbej",
+            storageBucket: "dastabbej.firebasestorage.app",
+            messagingSenderId: "551200937246",
+            appId: "1:551200937246:web:01e8d518f53fc5241e650f",
+            measurementId: "G-W3XL93BPH1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        // VAPID Key from user
+        const VAPID_KEY = "BJsudHUdXIh49XMUOOo3LH5hEE0Gp9gWbVXHytYRsKB9vfTr9U2Msk4Pr_tO4vHIgF0RakSEZOEEE8abAeFywIQ";
+
+        window.requestNotificationPermission = async function () {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                    if (token) {
+                        await registerToken(token);
+                        updateNotificationButtons(true);
+                        alert("Notifications enabled!");
+                    }
+                } else {
+                    alert("Permission denied. Please enable notifications in your browser settings.");
+                }
+            } catch (err) {
+                console.error('Error requesting permission:', err);
+            }
+        };
+
+        window.disableNotifications = async function () {
+            try {
+                let token = null;
+                try {
+                    token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                } catch (e) {
+                    console.log("Could not get token:", e);
+                }
+
+                if (token && userProfile) {
+                    await fetch('/api/fcm/token', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userProfile.id, token: token })
+                    });
+                }
+
+                updateNotificationButtons(false);
+                alert("Notifications disabled.");
+            } catch (err) {
+                console.error("Error disabling notifications:", err);
+                alert("Failed to disable notifications.");
+            }
+        }
+
+        async function registerToken(token) {
+            if (!userProfile) return;
+            await fetch('/api/fcm/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userProfile.id, token: token })
+            });
+        }
+
+        function updateNotificationButtons(isEnabled) {
+            const enableBtn = document.getElementById('enableNotifBtn');
+            const disableBtn = document.getElementById('disableNotifBtn');
+            if (enableBtn && disableBtn) {
+                if (isEnabled) {
+                    enableBtn.style.display = 'none';
+                    disableBtn.style.display = 'block';
+                } else {
+                    enableBtn.style.display = 'block';
+                    disableBtn.style.display = 'none';
+                }
+            }
+        }
+
+        async function checkNotificationState() {
+            if (Notification.permission === 'granted') {
+                try {
+                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                    if (token) {
+                        updateNotificationButtons(true);
+                        registerToken(token);
+                        return;
+                    }
+                } catch (e) { }
+            }
+            updateNotificationButtons(false);
+        }
+
+        checkNotificationState();
+
+        // PWA Install Logic
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installBtn.style.display = 'block';
+        });
+
+        async function installPWA() {
+            if (!deferredPrompt) return;
+            // Show the prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+
+
+
+        // Handle foreground messages
+        onMessage(messaging, (payload) => {
+            console.log('Message received. ', payload);
+            // Customize notification here
+            const { title, body } = payload.notification;
+
+            // Show toast or alert
+            const container = document.getElementById('noticesContainer');
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.backgroundColor = 'var(--accent)';
+            toast.style.color = 'white';
+            toast.style.padding = '15px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+            toast.style.zIndex = '1000';
+            toast.innerHTML = `<strong>${title}</strong><br>${body}`;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then((registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch((err) => {
+                    console.log('Service Worker registration failed:', err);
+                });
+        }
+    </script>
+</body>
+
+</html>
